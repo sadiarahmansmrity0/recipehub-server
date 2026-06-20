@@ -3,7 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db'); // Import the DB function
 const app = express();
-
+connectDB();
 // 1. Middleware for CORS
 app.use(cors({
     origin: [
