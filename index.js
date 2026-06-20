@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db'); // Import the DB function
+const authRoutes = require('./routes/authRoutes');
 const app = express();
 connectDB();
 // 1. Middleware for CORS
@@ -16,7 +17,7 @@ app.use(cors({
 // 2. Middleware for parsing data
 app.use(express.json());
 app.use(cookieParser());
-
+app.use('/auth', authRoutes);
 // --- ROUTES GO BELOW HERE ---
 app.get('/', (req, res) => {
     res.send('RecipeHub Server is running!');
