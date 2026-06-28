@@ -11,7 +11,10 @@ app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 
 // Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+      origin: [
+      'http://localhost:3000',
+      'https://recipehub-client-delta.vercel.app'
+    ],
     credentials: true
 }));
 app.use(express.json());
