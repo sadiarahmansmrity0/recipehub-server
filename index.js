@@ -6,17 +6,19 @@ const connectDB = require('./config/db');
 
 const app = express();
 
+// CORS Configuration - Allow all origins in production
+const corsOptions = {
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+};
+
+app.use(cors(corsOptions));
+
 // Webhook must come BEFORE express.json()
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 
-// Middleware
-app.use(cors({
-      origin: [
-      'http://localhost:3000',
-      'https://recipehub-client-delta.vercel.app'
-    ],
-    credentials: true
-}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -28,17 +30,27 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/recipes', require('./routes/recipeRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
-app.use('/api/payment', require('./routes/paymentRoutes')); // Add this
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
-// Error handling
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ message: 'Internal server error' });
+// Health Check Route
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Root Route
+app.get('/', (req, res) => {
+    res.json({ message: 'RecipeHub API is running' });
 });
 
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ message: 'Internal server error' });
 });
 
 const PORT = process.env.PORT || 5000;
