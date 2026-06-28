@@ -1,36 +1,44 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const connectDB = require('./config/db'); // Import the DB function
-const authRoutes = require('./routes/authRoutes');
-const recipeRoutes = require('./routes/recipeRoutes');
+require('dotenv').config();
+const connectDB = require('./config/db');
+
 const app = express();
-connectDB();
-// 1. Middleware for CORS
+
+// Webhook must come BEFORE express.json()
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
+// Middleware
 app.use(cors({
-    origin: [
-        'http://localhost:5173', 
-        'https://your-live-site-url.com' // replace this once  deploy
-    ],
-    credentials: true // Enables cookies to be sent/received
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true
 }));
-
-// 2. Middleware for parsing data
-
 app.use(express.json());
 app.use(cookieParser());
-app.use('/auth', authRoutes);
-app.use('/recipes', recipeRoutes);
-// --- ROUTES GO BELOW HERE ---
-app.get('/', (req, res) => {
-    res.send('RecipeHub Server is running!');
+
+// Database Connection
+connectDB();
+
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/recipes', require('./routes/recipeRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes')); // Add this
+
+// Error handling
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ message: 'Internal server error' });
 });
 
-app.listen(5000, () => {
-    console.log('Server is running on port 5000');
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
 });
-// Backend route
-app.get('/recipes', async (req, res) => {
-    const recipes = await Recipe.find(); // Fetch from MongoDB
-    res.send(recipes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
