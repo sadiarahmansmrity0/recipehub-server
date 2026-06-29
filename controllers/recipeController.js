@@ -111,17 +111,27 @@ exports.getAllRecipes = async (req, res) => {
 
 // Get Featured Recipes
 exports.getFeaturedRecipes = async (req, res) => {
-    try {
-        const recipes = await Recipe.find({ isFeatured: true, status: 'published' })
-            .limit(6)
-            .populate('authorId', 'name image');
-        res.json(recipes);
-    } catch (error) {
-        console.error('Get featured error:', error);
-        res.status(500).json({ message: 'Failed to fetch featured recipes' });
-    }
-};
 
+    console.log("Inside getFeaturedRecipes");
+
+    try {
+
+        const recipes = await Recipe.find({
+            isFeatured: true,
+            status: "published"
+        });
+
+        console.log(recipes);
+
+        res.json(recipes);
+
+    } catch(err){
+
+        console.log(err);
+
+        res.status(500).json(err);
+    }
+}
 // Get Popular Recipes
 exports.getPopularRecipes = async (req, res) => {
     try {

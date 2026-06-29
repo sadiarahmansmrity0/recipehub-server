@@ -18,8 +18,14 @@ const {
 
 // Public routes
 router.get('/', getAllRecipes);
-router.get('/featured', getFeaturedRecipes);
-router.get('/popular', getPopularRecipes);
+router.get("/featured", (req, res, next) => {
+    console.log("FEATURED ROUTE HIT");
+    next();
+}, getFeaturedRecipes);
+router.get("/popular", (req, res, next) => {
+    console.log("POPULAR ROUTE HIT");
+    next();
+}, getPopularRecipes);
 router.get('/:id', getRecipeById);
 
 // Protected routes
