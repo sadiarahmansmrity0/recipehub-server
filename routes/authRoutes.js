@@ -6,17 +6,15 @@ const {
     loginUser,
     getMe,
     logoutUser,
-    updateProfile ,
-     googleLogin
+    updateProfile,
+    googleLogin
 } = require('../controllers/authController');
 
-// Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 router.post('/google', googleLogin);
 
-// Protected routes
 router.get('/me', verifyToken, getMe);
 router.put('/profile', verifyToken, updateProfile);
 
