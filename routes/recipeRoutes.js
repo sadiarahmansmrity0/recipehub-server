@@ -16,19 +16,13 @@ const {
     toggleFeature
 } = require('../controllers/recipeController');
 
-// Public routes
+// ✅ PUBLIC ROUTES - No authentication required
 router.get('/', getAllRecipes);
-router.get("/featured", (req, res, next) => {
-    console.log("FEATURED ROUTE HIT");
-    next();
-}, getFeaturedRecipes);
-router.get("/popular", (req, res, next) => {
-    console.log("POPULAR ROUTE HIT");
-    next();
-}, getPopularRecipes);
+router.get('/featured', getFeaturedRecipes);  // ← THIS MUST EXIST
+router.get('/popular', getPopularRecipes);    // ← THIS MUST EXIST
 router.get('/:id', getRecipeById);
 
-// Protected routes
+// ✅ PROTECTED ROUTES
 router.post('/', verifyToken, createRecipe);
 router.put('/:id', verifyToken, updateRecipe);
 router.delete('/:id', verifyToken, deleteRecipe);
@@ -36,8 +30,6 @@ router.post('/:id/like', verifyToken, toggleLike);
 router.post('/:id/favorite', verifyToken, toggleFavorite);
 router.get('/user/my-recipes', verifyToken, getUserRecipes);
 router.get('/user/favorites', verifyToken, getUserFavorites);
-
-// Admin only routes
 router.put('/:id/feature', verifyToken, toggleFeature);
 
 module.exports = router;
