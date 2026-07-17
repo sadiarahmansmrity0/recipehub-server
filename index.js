@@ -957,7 +957,12 @@ app.post('/api/create-checkout-session', verifyToken, async (req, res) => {
       
       metadata.recipeId = recipeId;
     }
-
+console.log("========================================");
+console.log("Creating Stripe Checkout Session");
+console.log("CLIENT_URL:", process.env.CLIENT_URL);
+console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY?.substring(0, 20));
+console.log("Metadata:", metadata);
+console.log("========================================");
     const session = await stripe.checkout.sessions.create({
   payment_method_types: ["card"],
   line_items,
@@ -970,9 +975,19 @@ app.post('/api/create-checkout-session', verifyToken, async (req, res) => {
     return res.json({ success: true, url: session.url });
 
   } catch (error) {
-    console.error("Create Stripe Session Error:", error);
-    return res.status(500).json({ success: false, message: "Failed to create checkout session" });
-  }
+  console.log("========================================");
+  console.log("STRIPE CREATE CHECKOUT ERROR");
+  console.log("========================================");
+  console.error(error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+    type: error.type || null,
+    code: error.code || null,
+    stack: error.stack
+  });
+}
 });
 
 // Verify Stripe Payment Session
@@ -983,6 +998,10 @@ app.post('/api/payments/verify', verifyToken, async (req, res) => {
   }
 
   try {
+    console.log("========================================");
+console.log("VERIFYING SESSION");
+console.log("Session ID:", sessionId);
+console.log("========================================");
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.payment_status !== 'paid') {
       return res.status(400).json({ success: false, message: "Payment was not completed successfully" });
@@ -1032,9 +1051,19 @@ app.post('/api/payments/verify', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Verify Stripe Session Error:", error);
-    return res.status(500).json({ success: false, message: "Failed to verify payment session" });
-  }
+  console.log("========================================");
+  console.log("VERIFY PAYMENT ERROR");
+  console.log("========================================");
+  console.error(error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+    type: error.type || null,
+    code: error.code || null,
+    stack: error.stack
+  });
+}
 });
 
 // List Purchased Recipes for current user
