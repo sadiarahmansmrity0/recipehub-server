@@ -959,13 +959,13 @@ app.post('/api/create-checkout-session', verifyToken, async (req, res) => {
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items,
-      mode: 'payment',
-      success_url: `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:3000/recipes`,
-      metadata
-    });
+  payment_method_types: ["card"],
+  line_items,
+  mode: "payment",
+  success_url: `${process.env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${process.env.CLIENT_URL}/recipes`,
+  metadata
+});
 
     return res.json({ success: true, url: session.url });
 
