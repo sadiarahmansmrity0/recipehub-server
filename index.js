@@ -88,19 +88,19 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Connect to Database and start server (only for local development)
+// Connect to Database and start server
 let dbConnected = false;
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  connectDB().then(() => {
-    dbConnected = true;
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  }).catch(err => {
-    console.error("Database connection failed. Server not started.", err);
-  });
-} else {
+
+connectDB().then(() => {
   dbConnected = true;
-}
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("Database connection failed. Server not started.", err);
+  process.exit(1); // exit if DB fails
+});
+
 
 // HEALTH CHECK
 app.get('/api/health', (req, res) => {
