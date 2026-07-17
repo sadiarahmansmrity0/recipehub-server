@@ -904,6 +904,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Create Checkout Session
 app.post('/api/create-checkout-session', verifyToken, async (req, res) => {
+  console.log("==========================================");
+console.log("CREATE CHECKOUT SESSION CALLED");
+console.log("Headers:", req.headers);
+console.log("Authorization:", req.headers.authorization);
+console.log("User:", req.user);
+console.log("Body:", req.body);
+console.log("==========================================");
   const { type, recipeId } = req.body; // type can be 'premium' or 'recipe'
   
   if (!type || !['premium', 'recipe'].includes(type)) {

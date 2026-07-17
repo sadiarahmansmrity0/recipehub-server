@@ -2,6 +2,9 @@ import jwt from 'jsonwebtoken';
 import { getCollection } from './db.js';
 
 export async function verifyToken(req, res, next) {
+  console.log("========== VERIFY TOKEN ==========");
+console.log("Authorization Header:", req.headers.authorization);
+console.log("Cookies:", req.cookies);
   const token = req.cookies.token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
 
   if (!token) {
