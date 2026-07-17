@@ -1,18 +1,24 @@
 {
-  "name": "recipehub-server",
+  "name": "political-science-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "@better-auth/mongo-adapter": "^1.1.18",
+    "better-auth": "^1.1.18",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.0",
-    "mongodb": "^5.0.0",
-    "stripe": "^14.0.0"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.4.0",
+    "stripe": "^14.22.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
