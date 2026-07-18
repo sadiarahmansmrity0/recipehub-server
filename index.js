@@ -982,17 +982,10 @@ console.log("========================================");
     return res.json({ success: true, url: session.url });
 
   } catch (error) {
-  console.log("========================================");
-  console.log("STRIPE CREATE CHECKOUT ERROR");
-  console.log("========================================");
-  console.error(error);
-
+  console.error("Create Stripe Session Error:", error);
   return res.status(500).json({
     success: false,
-    message: error.message,
-    type: error.type || null,
-    code: error.code || null,
-    stack: error.stack
+    message: "Failed to create checkout session"
   });
 }
 });

@@ -3,44 +3,41 @@ import { getCollection } from './db.js';
 
 export async function verifyToken(req, res, next) {
   console.log("========== VERIFY TOKEN ==========");
-console.log("Authorization Header:", req.headers.authorization);
-console.log("Cookies:", req.cookies);
-  const token = req.cookies.token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
+  console.log("Authorization Header:", req.headers.authorization);
+  console.log("Cookies:", req.cookies);
+
+  // Always use Authorization header first
+  let token = null;
+
+  if (req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+    return res.status(401).json({
+      success: false,
+      message: "Access denied. No token provided."
+    });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Check if user is blocked in the database
-    const usersCollection = getCollection('users');
-    
-    // Better Auth saves users with standard email or ID. Let's find by email.
-    const user = await usersCollection.findOne({ email: decoded.email });
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    console.log("Decoded User:", decoded);
 
-    if (user.isBlocked) {
-      return res.status(403).json({ success: false, message: "Forbidden: User is blocked by admin" });
-    }
-
-    req.user = {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role || 'user',
-      isPremium: user.isPremium || false,
-      image: user.image
-    };
+    req.user = decoded;
 
     next();
+
   } catch (error) {
-    console.error("JWT verification failed:", error);
-    return res.status(401).json({ success: false, message: "Unauthorized: Invalid or expired token" });
+    console.error("VERIFY TOKEN ERROR:", error);
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token"
+    });
   }
 }
 
@@ -54,8 +51,15 @@ export function verifyAdmin(req, res, next) {
 }
 
 export async function getOptionalUser(req) {
-  const token = req.cookies?.token || (req.headers?.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
-  if (!token) return null;
+ let token = null;
+
+if (req.headers?.authorization?.startsWith("Bearer ")) {
+  token = req.headers.authorization.split(" ")[1];
+} else if (req.cookies?.token) {
+  token = req.cookies.token;
+}
+
+if (!token) return null;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
