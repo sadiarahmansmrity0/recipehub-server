@@ -20,7 +20,7 @@ const getUserIdQuery = (id) => {
   }
 };
 
-const MIN_WORD_COUNT = 400;
+const MIN_WORD_COUNT = 50;
 
 const countWords = (text) => {
   const trimmed = (text || '').trim();
