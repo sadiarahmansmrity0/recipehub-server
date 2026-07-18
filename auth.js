@@ -18,7 +18,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-      "recipehub-client-delta.vercel.app", 
+     "https://recipehub-client-delta.vercel.app" , 
     process.env.CLIENT_URL
   ].filter(Boolean),
   emailAndPassword: {

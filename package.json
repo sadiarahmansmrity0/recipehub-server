@@ -2,7 +2,7 @@
   "name": "recipehub-server",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
