@@ -149,7 +149,7 @@ app.post('/api/auth/register', async (req, res) => {
         name,
         email: email.toLowerCase(),
         password,
-        image: image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
+        image: image || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=2048x2048&w=is&k=20&c=wMTCZdfcnfH8GFWojm54r2NRaHuoQZyv7JxrdQmchkc="
       }
     });
 
@@ -347,7 +347,7 @@ app.post('/api/auth/google-callback', async (req, res) => {
       const insertResult = await usersCollection.insertOne({
         name: name || "Google User",
         email: email.toLowerCase(),
-        image: image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
+        image: image || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=2048x2048&w=is&k=20&c=wMTCZdfcnfH8GFWojm54r2NRaHuoQZyv7JxrdQmchkc=",
         role: 'user',
         isBlocked: false,
         isPremium: false,
@@ -499,26 +499,26 @@ app.post('/api/recipes', verifyToken, async (req, res) => {
       : resolvedTopics.split(',').map(i => i.trim()).filter(Boolean);
 
     const newRecipe = {
-      recipeName,
-      recipeImage: recipeImage || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570",
-      category,
-      recipeType: resolvedRecipeType,
-      cuisineType: resolvedRecipeType,
-      difficultyLevel,
-      preparationTime: parseInt(preparationTime, 10),
-      importantTopics: topicsArray,
-      ingredients: topicsArray,
-      instructions,
-      isPremium: !!isPremium,
-      authorId: req.user.id,
-      authorName: req.user.name,
-      authorEmail: req.user.email,
-      likesCount: 0,
-      isFeatured: false,
-      status: 'published',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  recipeName,
+  recipeImage,
+  category,
+  recipeType: resolvedRecipeType,
+  cuisineType,
+  difficultyLevel,
+  preparationTime: parseInt(preparationTime, 10),
+  importantTopics: topicsArray,
+  ingredients: topicsArray,
+  instructions,
+  isPremium: !!isPremium,
+  authorId: req.user.id,
+  authorName: req.user.name,
+  authorEmail: req.user.email,
+  likesCount: 0,
+  isFeatured: false,
+  status: "published",
+  createdAt: new Date(),
+  updatedAt: new Date()
+};
 
     const result = await recipesCollection.insertOne(newRecipe);
     return res.status(201).json({
