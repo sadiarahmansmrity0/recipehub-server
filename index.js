@@ -378,15 +378,19 @@ app.post('/api/auth/google-callback', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email, role: user.role || 'user' },
-      process.env.JWT_SECRET || 'political-science-department_jwt_secret_token_key_2026_xoxo',
-      { expiresIn: '10d' }
-    );
+  {
+    id: user._id.toString(),
+    email: user.email,
+    role: user.role || "user"
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "10d" }
+);
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 10 * 24 * 60 * 60 * 1000
     });
 
@@ -568,11 +572,20 @@ console.log("Documents:", docs);
 
     const totalRecipes = await recipesCollection.countDocuments(query);
     const recipes = await recipesCollection.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parsedLimit)
-      .toArray();
-
+  .sort({
+  createdAt: -1,
+  _id: -1,
+})
+  .skip(skip)
+  .limit(parsedLimit)
+  .toArray();
+console.log(
+  recipes.map(r => ({
+    id: r._id.toString(),
+    name: r.recipeName,
+    createdAt: r.createdAt
+  }))
+);
     return res.json({
       success: true,
       data: recipes.map(normalizeRecipe),

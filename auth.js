@@ -21,6 +21,12 @@ export const auth = betterAuth({
      "https://recipehub-client-delta.vercel.app" , 
     process.env.CLIENT_URL
   ].filter(Boolean),
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
