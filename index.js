@@ -34,6 +34,9 @@ const normalizeRecipe = (recipe) => {
   const topics = recipe.importantTopics || recipe.ingredients || [];
   return {
     ...recipe,
+    ...(Array.isArray(recipe.reviews) ? {
+      reviews: recipe.reviews.map(({ userId, userEmail, ...review }) => review)
+    } : {}),
     recipeType: recipe.recipeType || recipe.cuisineType || '',
     importantTopics: topics,
     importanttopics: topics,
@@ -668,6 +671,105 @@ app.get('/api/recipes/:id', async (req, res) => {
   }
 });
 
+// Get public ratings and reviews for a recipe
+app.get('/api/recipes/:id/reviews', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid recipe ID" });
+    }
+
+    const recipe = await getCollection('recipes').findOne(
+      { _id: new ObjectId(id) },
+      { projection: { reviews: 1 } }
+    );
+    if (!recipe) {
+      return res.status(404).json({ success: false, message: "Recipe not found" });
+    }
+
+    const reviews = recipe.reviews || [];
+    const ratingTotal = reviews.reduce((total, review) => total + review.rating, 0);
+    const currentUser = await getOptionalUser(req);
+
+    return res.json({
+      success: true,
+      reviews: reviews.map(({ userId, ...review }) => ({
+        ...review,
+        isOwnReview: userId === currentUser?.id
+      })),
+      averageRating: reviews.length ? Number((ratingTotal / reviews.length).toFixed(1)) : 0,
+      reviewCount: reviews.length
+    });
+  } catch (error) {
+    console.error("Get Recipe Reviews Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch reviews" });
+  }
+});
+
+// Create or update the authenticated user's review for a recipe
+app.put('/api/recipes/:id/reviews', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+    const normalizedComment = typeof comment === 'string' ? comment.trim() : '';
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid recipe ID" });
+    }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Rating must be a whole number from 1 to 5" });
+    }
+    if (!normalizedComment || normalizedComment.length > 1000) {
+      return res.status(400).json({ success: false, message: "Review comment must be between 1 and 1000 characters" });
+    }
+
+    const recipesCollection = getCollection('recipes');
+    const recipeId = new ObjectId(id);
+    const recipe = await recipesCollection.findOne({ _id: recipeId }, { projection: { _id: 1 } });
+    if (!recipe) {
+      return res.status(404).json({ success: false, message: "Recipe not found" });
+    }
+
+    const now = new Date();
+    const existingReview = await recipesCollection.findOne(
+      { _id: recipeId, "reviews.userId": req.user.id },
+      { projection: { _id: 1 } }
+    );
+
+    if (existingReview) {
+      await recipesCollection.updateOne(
+        { _id: recipeId, "reviews.userId": req.user.id },
+        { $set: {
+          "reviews.$.rating": rating,
+          "reviews.$.comment": normalizedComment,
+          "reviews.$.updatedAt": now
+        } }
+      );
+    } else {
+      const result = await recipesCollection.updateOne(
+        { _id: recipeId, $nor: [{ "reviews.userId": req.user.id }] },
+        { $push: { reviews: {
+          userId: req.user.id,
+          userName: req.user.name || "Anonymous",
+          rating,
+          comment: normalizedComment,
+          createdAt: now,
+          updatedAt: now
+        } } }
+      );
+
+      if (!result.modifiedCount) {
+        return res.status(409).json({ success: false, message: "A review already exists for this user and recipe. Refresh and edit it." });
+      }
+    }
+
+    return res.json({ success: true, message: "Review saved successfully" });
+  } catch (error) {
+    console.error("Save Recipe Review Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to save review" });
+  }
+});
+
 // Update Recipe (Protected)
 app.put('/api/recipes/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
@@ -688,6 +790,7 @@ app.put('/api/recipes/:id', verifyToken, async (req, res) => {
 
     // Strip uneditable fields
     const { _id, authorId, authorEmail, authorName, likesCount, createdAt, ...allowedUpdates } = updates;
+    delete allowedUpdates.reviews;
     allowedUpdates.updatedAt = new Date();
     
     if (allowedUpdates.preparationTime) {
