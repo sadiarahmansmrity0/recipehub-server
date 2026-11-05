@@ -6,6 +6,13 @@ dotenv.config();
 const uri = process.env.MONGO_DB_URI;
 const dbName = process.env.DB_NAME || "test";
 
+if (process.env.NODE_ENV === 'test') {
+  const expectedTestUri = process.env.RECIPEHUB_TEST_MONGO_URI;
+  if (!expectedTestUri || uri !== expectedTestUri || !/^recipehub_test_\d+$/.test(dbName)) {
+    throw new Error("Tests require the exact MongoMemoryServer URI and a recipehub_test_<pid> database name.");
+  }
+}
+
 if (!uri) {
   console.error("MONGO_DB_URI is not defined in the environment variables!");
   process.exit(1);
